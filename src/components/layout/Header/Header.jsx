@@ -25,8 +25,12 @@ const Header = () => {
       </Logo>
       
       <Nav role="navigation">
-        <NavItem as={Link} to={ROUTES.REGISTER}>
+        <NavItem as={Link} to={ROUTES.REGISTER_ROLE}>
           Register As A Professional
+        </NavItem>
+        
+        <NavItem as={Link} to={ROUTES.HELP}>
+          Help
         </NavItem>
         
         <NavItem as={Link} to={ROUTES.LOGIN} role="button" aria-label="Login or Sign Up">
@@ -42,7 +46,7 @@ const Header = () => {
       </MobileMenuButton>
 
       <MobileMenu isOpen={mobileMenuOpen}>
-        <MobileNavItem as={Link} to={ROUTES.REGISTER}>
+        <MobileNavItem as={Link} to={ROUTES.REGISTER_ROLE}>
           Register As A Professional
         </MobileNavItem>
         <MobileNavItem as={Link} to={ROUTES.HELP}>

@@ -6,7 +6,7 @@ export const HeroContainer = styled.section`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(to right, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.7));
+  
   background-size: cover;
   background-position: center;
   color: ${({ theme }) => theme.colors.white};
@@ -27,6 +27,7 @@ export const HeroBackground = styled.div`
 export const HeroContent = styled.div`
   text-align: center;
   max-width: 800px;
+  color: black;
   z-index: 1;
 `;
 
