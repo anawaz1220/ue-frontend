@@ -1,100 +1,272 @@
 import styled from 'styled-components';
-import { Link } from 'react-router-dom';
 
 export const BusinessRegistrationContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
   max-width: 800px;
-  margin: 0 auto;
+  margin: 2rem auto;
   padding: 2rem;
+  background-color: ${props => props.theme.colors.white};
+  border-radius: ${props => props.theme.borderRadius.medium};
+  box-shadow: ${props => props.theme.shadows.medium};
 `;
 
 export const LogoContainer = styled.div`
-  margin-bottom: 1.5rem;
   display: flex;
-  justify-content: center;
+  align-items: center;
+  margin-bottom: 2rem;
 `;
 
 export const Logo = styled.img`
-  width: 120px;
-  height: auto;
+  height: 40px;
+  margin-right: 1rem;
 `;
 
 export const FormTitle = styled.h1`
-  font-size: 1.75rem;
+  font-size: 1.8rem;
   font-weight: bold;
-  margin-bottom: 2rem;
-  color: ${({ theme }) => theme.colors.primary};
+  margin-bottom: 0.5rem;
   text-align: center;
+`;
+
+export const SectionTitle = styled.h2`
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid ${props => props.theme.colors.lightGrey};
 `;
 
 export const Form = styled.form`
   width: 100%;
+`;
+
+export const FormContainer = styled.div`
+  width: 100%;
+`;
+
+export const FormHeader = styled.div`
+  text-align: center;
   margin-bottom: 2rem;
+`;
+
+export const FormSubtitle = styled.p`
+  color: ${props => props.theme.colors.grey};
+  margin-bottom: 1rem;
+`;
+
+export const FormContent = styled.form`
+  width: 100%;
 `;
 
 export const FormSection = styled.div`
   margin-bottom: 2rem;
-  padding: 1.5rem;
-  background-color: #fafafa;
-  border-radius: 8px;
-  border: 1px solid #eee;
-`;
-
-export const SectionTitle = styled.h2`
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
-  color: ${({ theme }) => theme.colors.primary};
-  border-bottom: 1px solid #eee;
-  padding-bottom: 0.5rem;
 `;
 
 export const FormRow = styled.div`
   display: flex;
+  flex-wrap: wrap;
+  margin: 0 -1rem;
+  
+  @media (max-width: ${props => props.theme.breakpoints.mobile}) {
+    flex-direction: column;
+  }
+`;
+
+export const FormGroup = styled.div`
+  flex: 1;
+  min-width: 250px;
+  padding: 0 1rem;
+  margin-bottom: 1.5rem;
+  
+  @media (max-width: ${props => props.theme.breakpoints.mobile}) {
+    width: 100%;
+  }
+`;
+
+export const FormLabel = styled.label`
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+`;
+
+export const FormInputWrapper = styled.div`
+  position: relative;
+`;
+
+export const FormInput = styled.input`
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid ${props => props.theme.colors.lightGrey};
+  border-radius: ${props => props.theme.borderRadius.small};
+  font-size: 1rem;
+  outline: none;
+  
+  &:focus {
+    border-color: ${props => props.theme.colors.primary};
+  }
+`;
+
+export const FormError = styled.span`
+  color: ${props => props.theme.colors.error};
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: block;
+`;
+
+export const FormDivider = styled.div`
+  width: 100%;
+  height: 1px;
+  background-color: ${props => props.theme.colors.lightGrey};
+  margin: 2rem 0;
+`;
+
+export const FormActions = styled.div`
+  margin-top: 2rem;
+`;
+
+export const FormButtonGroup = styled.div`
+  display: flex;
+  justify-content: space-between;
   gap: 1rem;
   
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+  @media (max-width: ${props => props.theme.breakpoints.mobile}) {
     flex-direction: column;
-    gap: 0;
   }
 `;
 
-export const ActionButton = styled.button`
-  width: 100%;
-  padding: 1rem;
-  background-color: ${({ theme, disabled }) => 
-    disabled ? '#e0e0e0' : theme.colors.primary};
-  color: white;
-  border: none;
-  border-radius: 25px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
-  transition: all 0.2s ease-in-out;
-  margin-top: 1.5rem;
-
-  &:hover {
-    background-color: ${({ theme, disabled }) => 
-      disabled ? '#e0e0e0' : '#5e5eff'};
+export const FormButton = styled.button`
+  padding: 0.75rem 1.5rem;
+  border-radius: ${props => props.theme.borderRadius.small};
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  ${props => props.variant === 'primary' && `
+    background-color: ${props.theme.colors.primary};
+    color: white;
+    border: none;
+    
+    &:hover {
+      background-color: ${props.theme.colors.primary};
+      opacity: 0.9;
+    }
+  `}
+  
+  ${props => props.variant === 'outline' && `
+    background-color: transparent;
+    color: ${props.theme.colors.primary};
+    border: 1px solid ${props.theme.colors.primary};
+    
+    &:hover {
+      background-color: ${props.theme.colors.accent};
+    }
+  `}
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 `;
 
-export const LoginPrompt = styled.p`
-  font-size: 0.9rem;
-  color: ${({ theme }) => theme.colors.grey};
+export const StepIndicator = styled.div`
   display: flex;
-  gap: 0.5rem;
-  margin-top: 1rem;
+  align-items: center;
+  margin-bottom: 2rem;
+  width: 100%;
 `;
 
-export const LoginLink = styled(Link)`
-  color: ${({ theme }) => theme.colors.primary};
-  text-decoration: none;
-  font-weight: 600;
+export const StepItem = styled.div`
+  display: flex;
+  align-items: center;
+  opacity: ${props => props.active ? 1 : 0.5};
+`;
 
+export const StepNumber = styled.div`
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: ${props => props.theme.colors.primary};
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  margin-right: 0.5rem;
+`;
+
+export const StepText = styled.span`
+  font-weight: 500;
+`;
+
+export const StepConnector = styled.div`
+  flex: 1;
+  height: 2px;
+  background-color: ${props => props.active ? props.theme.colors.primary : props.theme.colors.lightGrey};
+  margin: 0 0.5rem;
+`;
+
+export const LoginPrompt = styled.div`
+  margin-top: 2rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: ${props => props.theme.colors.grey};
+`;
+
+export const LoginLink = styled.a`
+  color: ${props => props.theme.colors.primary};
+  font-weight: 500;
+  text-decoration: none;
+  
   &:hover {
     text-decoration: underline;
   }
 `;
+
+export const ActionButton = styled.button`
+  background: none;
+  border: none;
+  color: ${props => props.theme.colors.primary};
+  cursor: pointer;
+  font-weight: 500;
+  text-decoration: underline;
+  padding: 0;
+  margin: 0;
+  
+  &:hover {
+    opacity: 0.8;
+  }
+`;
+
+export default {
+  BusinessRegistrationContainer,
+  LogoContainer,
+  Logo,
+  FormTitle,
+  SectionTitle,
+  Form,
+  FormContainer,
+  FormHeader,
+  FormSubtitle,
+  FormContent,
+  FormSection,
+  FormRow,
+  FormGroup,
+  FormLabel,
+  FormInputWrapper,
+  FormInput,
+  FormError,
+  FormDivider,
+  FormActions,
+  FormButtonGroup,
+  FormButton,
+  StepIndicator,
+  StepItem,
+  StepNumber,
+  StepText,
+  StepConnector,
+  LoginPrompt,
+  LoginLink,
+  ActionButton
+};

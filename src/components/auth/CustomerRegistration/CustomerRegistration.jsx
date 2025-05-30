@@ -1,235 +1,243 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FormField, ImageUpload } from '../common';
+import { useForm } from 'react-hook-form';
 import {
-  CustomerRegistrationContainer,
-  LogoContainer,
-  Logo,
+  FormContainer,
+  FormHeader,
   FormTitle,
-  Form,
-  FormRow,
+  FormSubtitle,
+  FormContent,
   FormSection,
-  SectionTitle,
-  ActionButton,
-  LoginPrompt,
-  LoginLink
+  FormGroup,
+  FormLabel,
+  FormInput,
+  FormInputWrapper,
+  FormError,
+  FormButton,
+  FormButtonGroup,
+  FormActions,
+  FormDivider,
 } from './CustomerRegistration.styles';
+import { useAuth } from '../../../contexts/AuthContext';
 import ROUTES from '../../../constants/routes';
 
 const CustomerRegistration = () => {
+  const { registerCustomer } = useAuth();
   const navigate = useNavigate();
-  const [formState, setFormState] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    whatsApp: '',
-    houseAddress: '',
-    streetAddress: '',
-    city: '',
-    profilePicture: []
+  const [loading, setLoading] = useState(false);
+  const [registrationError, setRegistrationError] = useState('');
+  
+  const { register, handleSubmit, watch, formState: { errors } } = useForm({
+    defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      phoneNumber: '',
+      password: '',
+      confirmPassword: '',
+      agreeTerms: false
+    }
   });
   
-  const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    
-    setFormState(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    
-    // Clear error when field is edited
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
-    }
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-    
-    // Required fields
-    if (!formState.firstName.trim()) {
-      newErrors.firstName = 'First name is required';
-    }
-    
-    if (!formState.lastName.trim()) {
-      newErrors.lastName = 'Last name is required';
-    }
-    
-    if (!formState.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formState.email)) {
-      newErrors.email = 'Please enter a valid email address';
-    }
-    
-    if (!formState.phone.trim()) {
-      newErrors.phone = 'Phone number is required';
-    }
-    
-    if (!formState.houseAddress.trim() || !formState.streetAddress.trim() || !formState.city.trim()) {
-      newErrors.address = 'Complete address is required';
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  const watchPassword = watch('password');
   
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      // Scroll to the first error
-      const firstErrorField = Object.keys(errors)[0];
-      const errorElement = document.querySelector(`[name="${firstErrorField}"]`);
-      if (errorElement) {
-        errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-      return;
-    }
-    
-    setIsSubmitting(true);
+  const onSubmit = async (data) => {
+    setLoading(true);
+    setRegistrationError('');
     
     try {
-      // In a real app, this would send the data to an API
-      console.log('Submitting customer registration:', formState);
+      // Transform form data to match API requirements
+      const customerData = {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        password: data.password,
+        phoneNumber: data.phoneNumber
+      };
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Navigate to dashboard or confirmation page
+      await registerCustomer(customerData);
       navigate(ROUTES.REGISTER_SUCCESS);
     } catch (error) {
-      console.error('Registration failed:', error);
-      // Handle submission error
+      console.error('Registration error:', error);
+      setRegistrationError(error.message || 'Registration failed. Please try again.');
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
   
   return (
-    <CustomerRegistrationContainer>
-      <LogoContainer>
-        <Logo src="/assets/images/logo.svg" alt="Urban Ease Logo" />
-      </LogoContainer>
+    <FormContainer>
+      <FormHeader>
+        <FormTitle>Create Your Customer Account</FormTitle>
+        <FormSubtitle>
+          Find and book beauty services from the comfort of your home
+        </FormSubtitle>
+      </FormHeader>
       
-      <FormTitle>Customer Registration</FormTitle>
+      {registrationError && (
+        <div style={{ 
+          color: 'red', 
+          textAlign: 'center', 
+          marginBottom: '16px',
+          backgroundColor: 'rgba(255, 0, 0, 0.05)',
+          padding: '8px',
+          borderRadius: '4px'
+        }}>
+          {registrationError}
+        </div>
+      )}
       
-      <Form onSubmit={handleSubmit}>
+      <FormContent onSubmit={handleSubmit(onSubmit)}>
         <FormSection>
-          <SectionTitle>Personal Information</SectionTitle>
+          <FormGroup>
+            <FormLabel>First Name</FormLabel>
+            <FormInputWrapper>
+              <FormInput
+                type="text"
+                {...register('firstName', {
+                  required: 'First name is required',
+                  minLength: {
+                    value: 2,
+                    message: 'First name must be at least 2 characters'
+                  }
+                })}
+              />
+            </FormInputWrapper>
+            {errors.firstName && <FormError>{errors.firstName.message}</FormError>}
+          </FormGroup>
           
-          <FormRow>
-            <FormField
-              label="First Name"
-              name="firstName"
-              value={formState.firstName}
-              onChange={handleChange}
-              error={errors.firstName}
-              required
-            />
-            
-            <FormField
-              label="Last Name"
-              name="lastName"
-              value={formState.lastName}
-              onChange={handleChange}
-              error={errors.lastName}
-              required
-            />
-          </FormRow>
-          
-          <FormRow>
-            <FormField
-              label="Email"
-              name="email"
-              type="email"
-              value={formState.email}
-              onChange={handleChange}
-              error={errors.email}
-              required
-            />
-            
-            <FormField
-              label="Phone Number"
-              name="phone"
-              type="tel"
-              value={formState.phone}
-              onChange={handleChange}
-              error={errors.phone}
-              required
-            />
-          </FormRow>
-          
-          <FormField
-            label="WhatsApp Number"
-            name="whatsApp"
-            type="tel"
-            value={formState.whatsApp}
-            onChange={handleChange}
-            helperText="Optional: For service updates and communication"
-          />
+          <FormGroup>
+            <FormLabel>Last Name</FormLabel>
+            <FormInputWrapper>
+              <FormInput
+                type="text"
+                {...register('lastName', {
+                  required: 'Last name is required',
+                  minLength: {
+                    value: 2,
+                    message: 'Last name must be at least 2 characters'
+                  }
+                })}
+              />
+            </FormInputWrapper>
+            {errors.lastName && <FormError>{errors.lastName.message}</FormError>}
+          </FormGroup>
         </FormSection>
         
         <FormSection>
-          <SectionTitle>Service Address</SectionTitle>
+          <FormGroup>
+            <FormLabel>Email Address</FormLabel>
+            <FormInputWrapper>
+              <FormInput
+                type="email"
+                {...register('email', {
+                  required: 'Email is required',
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: 'Invalid email address'
+                  }
+                })}
+              />
+            </FormInputWrapper>
+            {errors.email && <FormError>{errors.email.message}</FormError>}
+          </FormGroup>
           
-          <FormField
-            label="House/Office"
-            name="houseAddress"
-            value={formState.houseAddress}
-            onChange={handleChange}
-            error={errors.address}
-            required
-          />
-          
-          <FormRow>
-            <FormField
-              label="Street"
-              name="streetAddress"
-              value={formState.streetAddress}
-              onChange={handleChange}
-              required
-            />
-            
-            <FormField
-              label="City"
-              name="city"
-              value={formState.city}
-              onChange={handleChange}
-              required
-            />
-          </FormRow>
+          <FormGroup>
+            <FormLabel>Phone Number</FormLabel>
+            <FormInputWrapper>
+              <FormInput
+                type="tel"
+                {...register('phoneNumber', {
+                  required: 'Phone number is required',
+                  pattern: {
+                    value: /^\+?\d{10,15}$/,
+                    message: 'Invalid phone number format'
+                  }
+                })}
+              />
+            </FormInputWrapper>
+            {errors.phoneNumber && <FormError>{errors.phoneNumber.message}</FormError>}
+          </FormGroup>
         </FormSection>
+        
+        <FormDivider />
         
         <FormSection>
-          <SectionTitle>Profile Photo</SectionTitle>
+          <FormGroup>
+            <FormLabel>Password</FormLabel>
+            <FormInputWrapper>
+              <FormInput
+                type="password"
+                {...register('password', {
+                  required: 'Password is required',
+                  minLength: {
+                    value: 8,
+                    message: 'Password must be at least 8 characters'
+                  },
+                  pattern: {
+                    value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d@$!%*?&]{8,}$/,
+                    message: 'Password must include uppercase, lowercase, and numbers'
+                  }
+                })}
+              />
+            </FormInputWrapper>
+            {errors.password && <FormError>{errors.password.message}</FormError>}
+          </FormGroup>
           
-          <ImageUpload
-            label="Profile Picture"
-            name="profilePicture"
-            value={formState.profilePicture}
-            onChange={handleChange}
-            maxFiles={1}
-            helperText="Upload a profile photo (Max: 5MB)"
-          />
+          <FormGroup>
+            <FormLabel>Confirm Password</FormLabel>
+            <FormInputWrapper>
+              <FormInput
+                type="password"
+                {...register('confirmPassword', {
+                  required: 'Please confirm your password',
+                  validate: value => value === watchPassword || 'Passwords do not match'
+                })}
+              />
+            </FormInputWrapper>
+            {errors.confirmPassword && <FormError>{errors.confirmPassword.message}</FormError>}
+          </FormGroup>
         </FormSection>
         
-        <ActionButton type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Registering...' : 'Register Account'}
-        </ActionButton>
-      </Form>
-      
-      <LoginPrompt>
-        Already have account? 
-        <LoginLink to={ROUTES.LOGIN}>Sign in</LoginLink>
-      </LoginPrompt>
-    </CustomerRegistrationContainer>
+        <FormGroup>
+          <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '1rem' }}>
+            <input
+              type="checkbox"
+              id="agreeTerms"
+              style={{ marginRight: '8px', marginTop: '4px' }}
+              {...register('agreeTerms', {
+                required: 'You must agree to terms and conditions'
+              })}
+            />
+            <FormLabel htmlFor="agreeTerms" style={{ marginBottom: 0 }}>
+              I agree to the Terms of Service and Privacy Policy
+            </FormLabel>
+          </div>
+          {errors.agreeTerms && <FormError>{errors.agreeTerms.message}</FormError>}
+        </FormGroup>
+        
+        <FormActions>
+          <FormButtonGroup>
+            <FormButton
+              type="button"
+              variant="outline"
+              onClick={() => navigate(ROUTES.REGISTER)}
+              disabled={loading}
+            >
+              Back
+            </FormButton>
+            
+            <FormButton
+              type="submit"
+              variant="primary"
+              disabled={loading}
+            >
+              {loading ? 'Registering...' : 'Create Account'}
+            </FormButton>
+          </FormButtonGroup>
+        </FormActions>
+      </FormContent>
+    </FormContainer>
   );
 };
 

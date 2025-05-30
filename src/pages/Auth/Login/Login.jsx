@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { 
   LoginContainer, 
@@ -15,25 +15,60 @@ import {
 } from './Login.styles';
 import { Button, Input, Checkbox, Typography } from '../../../components/common';
 import ROUTES from '../../../constants/routes';
+import { useAuth } from '../../../contexts/AuthContext';
 
 const Login = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [loading, setLoading] = useState(false);
+  const [loginError, setLoginError] = useState('');
+  const { login } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Get redirect path from location state or default to home
+  const from = location.state?.from?.pathname || '/';
 
   const onSubmit = async (data) => {
-    setLoading(true);
-    try {
-      // This is where you would integrate with your API
-      console.log('Login data:', data);
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      alert('Login successful!');
-    } catch (error) {
-      console.error('Login error:', error);
-      alert('Login failed. Please try again.');
-    } finally {
-      setLoading(false);
+  setLoading(true);
+  setLoginError('');
+  
+  try {
+    console.log('Submitting login with:', { email: data.email });
+    const loginResult = await login(data.email, data.password);
+    console.log('Login successful, result:', loginResult);
+    
+    // Determine redirect path based on user role
+    let redirectPath = '/';
+    
+    if (loginResult.user && loginResult.user.role) {
+      console.log('User role detected:', loginResult.user.role);
+      if (loginResult.user.role === 'CUSTOMER') {
+        redirectPath = ROUTES.CUSTOMER_PROFILE;
+      } else if (loginResult.user.role === 'BUSINESS') {
+        redirectPath = ROUTES.BUSINESS_PROFILE;
+      } else if (loginResult.user.role === 'ADMIN') {
+        redirectPath = ROUTES.ADMIN_DASHBOARD;
+      }
     }
+    
+    console.log('Redirecting to:', redirectPath);
+    navigate(redirectPath, { replace: true });
+  } catch (error) {
+    console.error('Login error:', error);
+    
+    if (error.message === 'Email not verified. Please verify your email to login.') {
+      setLoginError('Your email is not verified. Please check your inbox for verification email.');
+    } else {
+      setLoginError(error.message || 'Login failed. Please check your credentials and try again.');
+    }
+  } finally {
+    setLoading(false);
+  }
+};
+
+  const handleGoogleLogin = () => {
+    // This will be implemented when social authentication is available
+    alert('Google login is not available yet.');
   };
 
   return (
@@ -45,12 +80,25 @@ const Login = () => {
           </Typography>
         </FormTitle>
 
+        {loginError && (
+          <div style={{ 
+            color: 'red', 
+            textAlign: 'center', 
+            marginBottom: '16px',
+            backgroundColor: 'rgba(255, 0, 0, 0.05)',
+            padding: '8px',
+            borderRadius: '4px'
+          }}>
+            {loginError}
+          </div>
+        )}
+
         <Input
-          label="Username or Email Address:"
+          label="Email Address"
           id="email"
           name="email"
           type="email"
-          placeholder="johnsmith@abccompany.com"
+          placeholder="johnsmith@example.com"
           error={errors.email?.message}
           {...register('email', { 
             required: 'Email is required',
@@ -62,8 +110,8 @@ const Login = () => {
         />
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant="body1">Password:</Typography>
-          <ForgotPasswordLink as={Link} to={ROUTES.FORGOT_PASSWORD}>
+          <Typography variant="body1">Password</Typography>
+          <ForgotPasswordLink as={Link} to={ROUTES.REQUEST_PASSWORD_RESET}>
             Reset Password?
           </ForgotPasswordLink>
         </div>
@@ -76,10 +124,6 @@ const Login = () => {
           error={errors.password?.message}
           {...register('password', { 
             required: 'Password is required',
-            minLength: {
-              value: 6,
-              message: 'Password must be at least 6 characters'
-            }
           })}
         />
 
@@ -102,9 +146,11 @@ const Login = () => {
         <Divider>or</Divider>
 
         <SocialLoginContainer>
-          
-
-          <SocialLoginButton variant="social">
+          <SocialLoginButton 
+            variant="social"
+            type="button"
+            onClick={handleGoogleLogin}
+          >
             <GoogleIcon />
             Sign in with Google
           </SocialLoginButton>

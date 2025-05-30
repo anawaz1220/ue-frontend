@@ -1,314 +1,440 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FormField, ImageUpload, ServiceSelection } from '../common';
+import { useForm } from 'react-hook-form';
 import {
-  BusinessRegistrationContainer,
-  LogoContainer,
-  Logo,
+  FormContainer,
+  FormHeader,
   FormTitle,
-  Form,
-  FormRow,
+  FormSubtitle,
+  FormContent,
   FormSection,
-  SectionTitle,
-  ActionButton,
-  LoginPrompt,
-  LoginLink
+  FormGroup,
+  FormLabel,
+  FormInput,
+  FormInputWrapper,
+  FormError,
+  FormButton,
+  FormButtonGroup,
+  FormActions,
+  FormDivider,
+  StepIndicator,
+  StepItem,
+  StepNumber,
+  StepText,
+  StepConnector
 } from './BusinessRegistration.styles';
+import { useAuth } from '../../../contexts/AuthContext';
 import ROUTES from '../../../constants/routes';
+import ServiceSelection from '../common/ServiceSelection';
+import ImageUpload from '../common/ImageUpload';
 
 const BusinessRegistration = () => {
+  const { registerBusiness } = useAuth();
   const navigate = useNavigate();
-  const [formState, setFormState] = useState({
-    businessName: '',
-    email: '',
-    phone: '',
-    alternatePhone: '',
-    whatsApp: '',
-    instagram: '',
-    ownerName: '',
-    ownerPhone: '',
-    services: [],
-    buildingAddress: '',
-    streetAddress: '',
-    city: '',
-    latitude: '',
-    longitude: '',
-    pictures: []
+  const [currentStep, setCurrentStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [registrationError, setRegistrationError] = useState('');
+  const [selectedServices, setSelectedServices] = useState([]);
+  const [logoImage, setLogoImage] = useState(null);
+  
+  const { register, handleSubmit, watch, formState: { errors }, trigger } = useForm({
+    defaultValues: {
+      businessName: '',
+      email: '',
+      phoneNumber: '',
+      whatsappNumber: '', // Optional
+      building: '',
+      street: '',
+      city: 'Sudbury', // Default city
+      ownerName: '',
+      ownerPhone: '',
+      password: '',
+      confirmPassword: '',
+      agreeTerms: false
+    }
   });
   
-  const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    
-    setFormState(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    
-    // Clear error when field is edited
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
+  const watchPassword = watch('password');
+  
+  const nextStep = async () => {
+    const isValid = await trigger();
+    if (isValid) {
+      setCurrentStep(prevStep => prevStep + 1);
     }
-  };
-
-  const validateForm = () => {
-    const newErrors = {};
-    
-    // Required fields
-    if (!formState.businessName.trim()) {
-      newErrors.businessName = 'Business name is required';
-    }
-    
-    if (!formState.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formState.email)) {
-      newErrors.email = 'Please enter a valid email address';
-    }
-    
-    if (!formState.phone.trim()) {
-      newErrors.phone = 'Phone number is required';
-    }
-    
-    if (!formState.ownerName.trim()) {
-      newErrors.ownerName = 'Owner name is required';
-    }
-    
-    if (!formState.ownerPhone.trim()) {
-      newErrors.ownerPhone = 'Owner phone is required';
-    }
-    
-    if (formState.services.length === 0) {
-      newErrors.services = 'Please select at least one service';
-    }
-    
-    if (!formState.buildingAddress.trim() || !formState.streetAddress.trim() || !formState.city.trim()) {
-      newErrors.address = 'Complete address is required';
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
   };
   
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!validateForm()) {
-      // Scroll to the first error
-      const firstErrorField = Object.keys(errors)[0];
-      const errorElement = document.querySelector(`[name="${firstErrorField}"]`);
-      if (errorElement) {
-        errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-      return;
-    }
-    
-    setIsSubmitting(true);
+  const prevStep = () => {
+    setCurrentStep(prevStep => prevStep - 1);
+  };
+  
+  const onSubmit = async (data) => {
+    setLoading(true);
+    setRegistrationError('');
     
     try {
-      // In a real app, this would send the data to an API
-      console.log('Submitting business registration:', formState);
+      // Transform form data to match API requirements
+      const businessData = {
+        email: data.email,
+        password: data.password,
+        businessName: data.businessName,
+        phoneNumber: data.phoneNumber,
+        ownerName: data.ownerName,
+        ownerPhone: data.ownerPhone,
+        building: data.building,
+        street: data.street,
+        city: data.city,
+        // Include optional fields if provided
+        ...(data.whatsappNumber && { whatsappNumber: data.whatsappNumber }),
+      };
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await registerBusiness(businessData);
       
-      // Navigate to dashboard or confirmation page
+      // Note: Service selection will be handled after account creation and verification
+      // since it requires authentication
+      
       navigate(ROUTES.REGISTER_SUCCESS);
     } catch (error) {
-      console.error('Registration failed:', error);
-      // Handle submission error
+      console.error('Registration error:', error);
+      setRegistrationError(error.message || 'Registration failed. Please try again.');
+      setCurrentStep(1); // Back to first step on error
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
+    }
+  };
+  
+  const handleServiceSelection = (services) => {
+    setSelectedServices(services);
+  };
+  
+  const handleLogoUpload = (file) => {
+    setLogoImage(file);
+  };
+  
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 1:
+        return (
+          <>
+            <FormSection>
+              <FormGroup>
+                <FormLabel>Business Name</FormLabel>
+                <FormInputWrapper>
+                  <FormInput
+                    type="text"
+                    {...register('businessName', {
+                      required: 'Business name is required',
+                      minLength: {
+                        value: 2,
+                        message: 'Business name must be at least 2 characters'
+                      }
+                    })}
+                  />
+                </FormInputWrapper>
+                {errors.businessName && <FormError>{errors.businessName.message}</FormError>}
+              </FormGroup>
+              
+              <FormGroup>
+                <FormLabel>Email Address</FormLabel>
+                <FormInputWrapper>
+                  <FormInput
+                    type="email"
+                    {...register('email', {
+                      required: 'Email is required',
+                      pattern: {
+                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                        message: 'Invalid email address'
+                      }
+                    })}
+                  />
+                </FormInputWrapper>
+                {errors.email && <FormError>{errors.email.message}</FormError>}
+              </FormGroup>
+            </FormSection>
+            
+            <FormSection>
+              <FormGroup>
+                <FormLabel>Business Phone Number</FormLabel>
+                <FormInputWrapper>
+                  <FormInput
+                    type="tel"
+                    {...register('phoneNumber', {
+                      required: 'Phone number is required',
+                      pattern: {
+                        value: /^\+?\d{10,15}$/,
+                        message: 'Invalid phone number format'
+                      }
+                    })}
+                  />
+                </FormInputWrapper>
+                {errors.phoneNumber && <FormError>{errors.phoneNumber.message}</FormError>}
+              </FormGroup>
+              
+              <FormGroup>
+                <FormLabel>Business WhatsApp Number (Optional)</FormLabel>
+                <FormInputWrapper>
+                  <FormInput
+                    type="tel"
+                    {...register('whatsappNumber', {
+                      pattern: {
+                        value: /^\+?\d{10,15}$/,
+                        message: 'Invalid phone number format'
+                      }
+                    })}
+                  />
+                </FormInputWrapper>
+                {errors.whatsappNumber && <FormError>{errors.whatsappNumber.message}</FormError>}
+              </FormGroup>
+            </FormSection>
+          </>
+        );
+        
+      case 2:
+        return (
+          <>
+            <FormSection>
+              <FormGroup>
+                <FormLabel>Owner Full Name</FormLabel>
+                <FormInputWrapper>
+                  <FormInput
+                    type="text"
+                    {...register('ownerName', {
+                      required: 'Owner name is required',
+                      minLength: {
+                        value: 2,
+                        message: 'Owner name must be at least 2 characters'
+                      }
+                    })}
+                  />
+                </FormInputWrapper>
+                {errors.ownerName && <FormError>{errors.ownerName.message}</FormError>}
+              </FormGroup>
+              
+              <FormGroup>
+                <FormLabel>Owner Phone Number</FormLabel>
+                <FormInputWrapper>
+                  <FormInput
+                    type="tel"
+                    {...register('ownerPhone', {
+                      required: 'Owner phone is required',
+                      pattern: {
+                        value: /^\+?\d{10,15}$/,
+                        message: 'Invalid phone number format'
+                      }
+                    })}
+                  />
+                </FormInputWrapper>
+                {errors.ownerPhone && <FormError>{errors.ownerPhone.message}</FormError>}
+              </FormGroup>
+            </FormSection>
+            
+            <FormSection>
+              <FormGroup>
+                <FormLabel>Building/House Number</FormLabel>
+                <FormInputWrapper>
+                  <FormInput
+                    type="text"
+                    {...register('building', {
+                      required: 'Building/house number is required'
+                    })}
+                  />
+                </FormInputWrapper>
+                {errors.building && <FormError>{errors.building.message}</FormError>}
+              </FormGroup>
+              
+              <FormGroup>
+                <FormLabel>Street Name</FormLabel>
+                <FormInputWrapper>
+                  <FormInput
+                    type="text"
+                    {...register('street', {
+                      required: 'Street name is required'
+                    })}
+                  />
+                </FormInputWrapper>
+                {errors.street && <FormError>{errors.street.message}</FormError>}
+              </FormGroup>
+            </FormSection>
+            
+            <FormSection>
+              <FormGroup>
+                <FormLabel>City</FormLabel>
+                <FormInputWrapper>
+                  <FormInput
+                    type="text"
+                    {...register('city', {
+                      required: 'City is required'
+                    })}
+                  />
+                </FormInputWrapper>
+                {errors.city && <FormError>{errors.city.message}</FormError>}
+              </FormGroup>
+            </FormSection>
+          </>
+        );
+        
+      case 3:
+        return (
+          <>
+            <FormSection>
+              <FormGroup>
+                <FormLabel>Password</FormLabel>
+                <FormInputWrapper>
+                  <FormInput
+                    type="password"
+                    {...register('password', {
+                      required: 'Password is required',
+                      minLength: {
+                        value: 8,
+                        message: 'Password must be at least 8 characters'
+                      },
+                      pattern: {
+                        value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[@$!%*?&a-zA-Z\d]{8,}$/,
+                        message: 'Password must include uppercase, lowercase, and numbers'
+                      }
+                    })}
+                  />
+                </FormInputWrapper>
+                {errors.password && <FormError>{errors.password.message}</FormError>}
+              </FormGroup>
+              
+              <FormGroup>
+                <FormLabel>Confirm Password</FormLabel>
+                <FormInputWrapper>
+                  <FormInput
+                    type="password"
+                    {...register('confirmPassword', {
+                      required: 'Please confirm your password',
+                      validate: value => value === watchPassword || 'Passwords do not match'
+                    })}
+                  />
+                </FormInputWrapper>
+                {errors.confirmPassword && <FormError>{errors.confirmPassword.message}</FormError>}
+              </FormGroup>
+            </FormSection>
+            
+            <FormGroup>
+              <div style={{ display: 'flex', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                <input
+                  type="checkbox"
+                  id="agreeTerms"
+                  style={{ marginRight: '8px', marginTop: '4px' }}
+                  {...register('agreeTerms', {
+                    required: 'You must agree to terms and conditions'
+                  })}
+                />
+                <FormLabel htmlFor="agreeTerms" style={{ marginBottom: 0 }}>
+                  I agree to the Terms of Service and Privacy Policy
+                </FormLabel>
+              </div>
+              {errors.agreeTerms && <FormError>{errors.agreeTerms.message}</FormError>}
+            </FormGroup>
+            
+            <FormSection>
+              <p style={{ marginBottom: '1rem' }}>
+                After registration, you'll receive a confirmation email. Once verified, 
+                you can log in to complete your business profile and start offering your services.
+              </p>
+            </FormSection>
+          </>
+        );
+        
+      default:
+        return null;
     }
   };
   
   return (
-    <BusinessRegistrationContainer>
-      <LogoContainer>
-        <Logo src="/assets/images/logo.svg" alt="Urban Ease Logo" />
-      </LogoContainer>
+    <FormContainer>
+      <FormHeader>
+        <FormTitle>Register Your Beauty Business</FormTitle>
+        <FormSubtitle>
+          Join our platform and connect with customers in your area
+        </FormSubtitle>
+      </FormHeader>
       
-      <FormTitle>Business Registration</FormTitle>
+      {registrationError && (
+        <div style={{ 
+          color: 'red', 
+          textAlign: 'center', 
+          marginBottom: '16px',
+          backgroundColor: 'rgba(255, 0, 0, 0.05)',
+          padding: '8px',
+          borderRadius: '4px'
+        }}>
+          {registrationError}
+        </div>
+      )}
       
-      <Form onSubmit={handleSubmit}>
-        <FormSection>
-          <SectionTitle>Business Information</SectionTitle>
-          
-          <FormField
-            label="Business Name"
-            name="businessName"
-            value={formState.businessName}
-            onChange={handleChange}
-            error={errors.businessName}
-            required
-          />
-          
-          <FormRow>
-            <FormField
-              label="Email"
-              name="email"
-              type="email"
-              value={formState.email}
-              onChange={handleChange}
-              error={errors.email}
-              required
-            />
-            
-            <FormField
-              label="Phone Number"
-              name="phone"
-              type="tel"
-              value={formState.phone}
-              onChange={handleChange}
-              error={errors.phone}
-              required
-            />
-          </FormRow>
-          
-          <FormRow>
-            <FormField
-              label="Alternate Phone"
-              name="alternatePhone"
-              type="tel"
-              value={formState.alternatePhone}
-              onChange={handleChange}
-            />
-            
-            <FormField
-              label="WhatsApp Number"
-              name="whatsApp"
-              type="tel"
-              value={formState.whatsApp}
-              onChange={handleChange}
-            />
-          </FormRow>
-          
-          <FormField
-            label="Instagram ID"
-            name="instagram"
-            value={formState.instagram}
-            onChange={handleChange}
-            placeholder="@yourbusiness"
-          />
-        </FormSection>
+      <StepIndicator>
+        <StepItem active={currentStep >= 1} completed={currentStep > 1}>
+          <StepNumber>{currentStep > 1 ? '✓' : '1'}</StepNumber>
+          <StepText>Business Info</StepText>
+        </StepItem>
         
-        <FormSection>
-          <SectionTitle>Owner Information</SectionTitle>
-          
-          <FormRow>
-            <FormField
-              label="Owner Name"
-              name="ownerName"
-              value={formState.ownerName}
-              onChange={handleChange}
-              error={errors.ownerName}
-              required
-            />
-            
-            <FormField
-              label="Owner Phone"
-              name="ownerPhone"
-              type="tel"
-              value={formState.ownerPhone}
-              onChange={handleChange}
-              error={errors.ownerPhone}
-              required
-            />
-          </FormRow>
-        </FormSection>
+        <StepConnector active={currentStep > 1} />
         
-        <FormSection>
-          <SectionTitle>Services</SectionTitle>
-          
-          <ServiceSelection
-            name="services"
-            value={formState.services}
-            onChange={handleChange}
-            error={errors.services}
-            required
-          />
-        </FormSection>
+        <StepItem active={currentStep >= 2} completed={currentStep > 2}>
+          <StepNumber>{currentStep > 2 ? '✓' : '2'}</StepNumber>
+          <StepText>Location</StepText>
+        </StepItem>
         
-        <FormSection>
-          <SectionTitle>Location</SectionTitle>
-          
-          <FormField
-            label="Building/House"
-            name="buildingAddress"
-            value={formState.buildingAddress}
-            onChange={handleChange}
-            error={errors.address}
-            required
-          />
-          
-          <FormRow>
-            <FormField
-              label="Street"
-              name="streetAddress"
-              value={formState.streetAddress}
-              onChange={handleChange}
-              required
-            />
-            
-            <FormField
-              label="City"
-              name="city"
-              value={formState.city}
-              onChange={handleChange}
-              required
-            />
-          </FormRow>
-          
-          <FormRow>
-            <FormField
-              label="Latitude"
-              name="latitude"
-              type="number"
-              step="0.000001"
-              value={formState.latitude}
-              onChange={handleChange}
-              helperText="Optional: Use map pin or GPS coordinates"
-            />
-            
-            <FormField
-              label="Longitude"
-              name="longitude"
-              type="number"
-              step="0.000001"
-              value={formState.longitude}
-              onChange={handleChange}
-              helperText="Optional: Use map pin or GPS coordinates"
-            />
-          </FormRow>
-        </FormSection>
+        <StepConnector active={currentStep > 2} />
         
-        <FormSection>
-          <SectionTitle>Business Photos</SectionTitle>
-          
-          <ImageUpload
-            label="Business Pictures"
-            name="pictures"
-            value={formState.pictures}
-            onChange={handleChange}
-            maxFiles={3}
-            helperText="Upload up to 3 photos of your business (Max: 5MB each)"
-          />
-        </FormSection>
-        
-        <ActionButton type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Registering...' : 'Register Business'}
-        </ActionButton>
-      </Form>
+        <StepItem active={currentStep >= 3}>
+          <StepNumber>3</StepNumber>
+          <StepText>Account</StepText>
+        </StepItem>
+      </StepIndicator>
       
-      <LoginPrompt>
-        Already have account? 
-        <LoginLink to={ROUTES.LOGIN}>Sign in</LoginLink>
-      </LoginPrompt>
-    </BusinessRegistrationContainer>
+      <FormContent onSubmit={handleSubmit(onSubmit)}>
+        {renderStepContent()}
+        
+        <FormActions>
+          <FormButtonGroup>
+            {currentStep > 1 && (
+              <FormButton
+                type="button"
+                variant="outline"
+                onClick={prevStep}
+                disabled={loading}
+              >
+                Back
+              </FormButton>
+            )}
+            
+            {currentStep === 1 && (
+              <FormButton
+                type="button"
+                variant="outline"
+                onClick={() => navigate(ROUTES.REGISTER)}
+                disabled={loading}
+              >
+                Cancel
+              </FormButton>
+            )}
+            
+            {currentStep < 3 ? (
+              <FormButton
+                type="button"
+                variant="primary"
+                onClick={nextStep}
+                disabled={loading}
+              >
+                Next
+              </FormButton>
+            ) : (
+              <FormButton
+                type="submit"
+                variant="primary"
+                disabled={loading}
+              >
+                {loading ? 'Registering...' : 'Create Account'}
+              </FormButton>
+            )}
+          </FormButtonGroup>
+        </FormActions>
+      </FormContent>
+    </FormContainer>
   );
 };
 
