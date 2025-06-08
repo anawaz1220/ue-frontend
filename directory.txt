@@ -1,13 +1,14 @@
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\.env
+D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\.env.local
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\.git
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\.gitignore
+D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\.npmrc
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\directory.txt
-D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\node_modules
-D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\package-lock.json
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\package.json
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\public
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\README.md
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src
+D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\vercel.json
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\public\assets
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\public\favicon.ico
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\public\images
@@ -41,6 +42,7 @@ D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\App.css
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\App.jsx
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\App.test.js
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\components
+D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\config
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\constants
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\contexts
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\data
@@ -90,6 +92,7 @@ D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\components\auth\RoleSelectio
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\components\common\ApiError.jsx
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\components\common\Button
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\components\common\Checkbox
+D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\components\common\ErrorBoundary.jsx
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\components\common\index.js
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\components\common\Input
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\components\common\LoadingSpinner.jsx
@@ -138,6 +141,7 @@ D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\components\services\ServiceC
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\components\services\ServiceCategories.jsx
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\components\services\ServiceList.jsx
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\components\services\ServicePromise.jsx
+D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\config\api.js
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\constants\routes.js
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\contexts\AuthContext.jsx
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\contexts\CartContext.jsx
@@ -146,13 +150,15 @@ D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\data\dummyBusinessData.js
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\data\dummyServicesData.js
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\data\dummyWorkHistoryData.js
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\data\servicesData.js
-D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\hooks\useCart.js
+D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\pages\Admin
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\pages\Auth
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\pages\BusinessProfile
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\pages\Customer
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\pages\Home
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\pages\index.js
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\pages\Services
+D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\pages\Admin\AdminDashboard.jsx
+D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\pages\Admin\index.js
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\pages\Auth\BusinessRegisterPage.jsx
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\pages\Auth\CustomerRegisterPage.jsx
 D:\Personel\UrbanEase\Glam Ease\app\ue-frontend\src\pages\Auth\EmailVerification.jsx

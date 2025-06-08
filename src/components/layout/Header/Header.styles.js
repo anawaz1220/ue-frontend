@@ -58,7 +58,7 @@ export const NavLinks = styled.nav`
 
 export const NavLink = styled.a`
   color: ${props => 
-    props.active 
+    props.$active 
       ? props.theme.colors.primary 
       : props.theme.colors.grey};
   text-decoration: none;
@@ -71,7 +71,7 @@ export const NavLink = styled.a`
     color: ${props => props.theme.colors.primary};
   }
   
-  ${props => props.active && css`
+  ${props => props.$active && css`
     &::after {
       content: '';
       position: absolute;
@@ -84,7 +84,7 @@ export const NavLink = styled.a`
     }
   `}
   
-  ${props => props.highlight && css`
+  ${props => props.$highlight && css`
     background-color: ${props.theme.colors.primary};
     color: ${props.theme.colors.white};
     border-radius: ${props.theme.borderRadius.small};
@@ -157,7 +157,7 @@ export const MobileMenu = styled.div`
 
 export const MobileNavLink = styled.a`
   color: ${props => 
-    props.active 
+    props.$active 
       ? props.theme.colors.primary 
       : props.theme.colors.grey};
   text-decoration: none;
@@ -256,21 +256,3 @@ export const CartBadge = styled.span`
   align-items: center;
   justify-content: center;
 `;
-
-export default {
-  HeaderContainer,
-  HeaderContent,
-  Logo,
-  NavLinks,
-  NavLink,
-  AuthButtons,
-  ProfileButton,
-  MobileMenuButton,
-  MobileMenu,
-  MobileNavLink,
-  UserMenu,
-  UserMenuItem,
-  LogoutButton,
-  CartIcon,
-  CartBadge
-};

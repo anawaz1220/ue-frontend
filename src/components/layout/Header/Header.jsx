@@ -66,7 +66,7 @@ const Header = () => {
       console.error('Logout error:', error);
     }
   };
-
+  
   const getProfileRoute = () => {
     if (isCustomer) return ROUTES.CUSTOMER_PROFILE;
     if (isBusiness) return ROUTES.BUSINESS_PROFILE;
@@ -87,13 +87,20 @@ const Header = () => {
 
         {/* Desktop Navigation */}
         <NavLinks>
-          <NavLink as={Link} to={ROUTES.HOME} active={location.pathname === ROUTES.HOME}>
+          <NavLink 
+            as={Link} 
+            to={ROUTES.HOME} 
+            $active={location.pathname === ROUTES.HOME}
+          >
             Home
           </NavLink>
-          <NavLink as={Link} to={ROUTES.SERVICES} active={location.pathname.startsWith(ROUTES.SERVICES)}>
+          <NavLink 
+            as={Link} 
+            to={ROUTES.SERVICES} 
+            $active={location.pathname.startsWith(ROUTES.SERVICES)}
+          >
             Services
           </NavLink>
-          {/* Add more nav links as needed */}
         </NavLinks>
 
         {/* Authentication/Profile Section */}
@@ -126,11 +133,9 @@ const Header = () => {
                     My Profile
                   </UserMenuItem>
                   {isCustomer && (
-                    <>
-                      <UserMenuItem as={Link} to={`${ROUTES.CUSTOMER_PROFILE}?tab=bookings`}>
-                        My Bookings
-                      </UserMenuItem>
-                    </>
+                    <UserMenuItem as={Link} to={`${ROUTES.CUSTOMER_PROFILE}?tab=bookings`}>
+                      My Bookings
+                    </UserMenuItem>
                   )}
                   {isBusiness && (
                     <>
@@ -142,6 +147,11 @@ const Header = () => {
                       </UserMenuItem>
                     </>
                   )}
+                  {user?.role === 'ADMIN' && (
+                    <UserMenuItem as={Link} to={ROUTES.ADMIN_DASHBOARD}>
+                      Dashboard
+                    </UserMenuItem>
+                  )}
                   <LogoutButton onClick={handleLogout}>Logout</LogoutButton>
                 </UserMenu>
               )}
@@ -152,7 +162,7 @@ const Header = () => {
             <NavLink as={Link} to={ROUTES.LOGIN}>
               Login
             </NavLink>
-            <NavLink as={Link} to={ROUTES.REGISTER} highlight="true">
+            <NavLink as={Link} to={ROUTES.REGISTER} $highlight="true">
               Register
             </NavLink>
           </AuthButtons>
@@ -180,10 +190,18 @@ const Header = () => {
       {/* Mobile Menu */}
       {mobileMenuOpen && (
         <MobileMenu>
-          <MobileNavLink as={Link} to={ROUTES.HOME} active={location.pathname === ROUTES.HOME}>
+          <MobileNavLink 
+            as={Link} 
+            to={ROUTES.HOME} 
+            $active={location.pathname === ROUTES.HOME}
+          >
             Home
           </MobileNavLink>
-          <MobileNavLink as={Link} to={ROUTES.SERVICES} active={location.pathname.startsWith(ROUTES.SERVICES)}>
+          <MobileNavLink 
+            as={Link} 
+            to={ROUTES.SERVICES} 
+            $active={location.pathname.startsWith(ROUTES.SERVICES)}
+          >
             Services
           </MobileNavLink>
           
@@ -209,15 +227,11 @@ const Header = () => {
                   </MobileNavLink>
                 </>
               )}
+              
               {user?.role === 'ADMIN' && (
-                <>
-                  <MobileNavLink as={Link} to={`${ROUTES.ADMIN_DASHBOARD}`}>
-                    Dashboard
-                  </MobileNavLink>
-                  <MobileNavLink as={Link} to={`${ROUTES.ADMIN_USERS}`}>
-                    Manage Users
-                  </MobileNavLink>
-                </>
+                <MobileNavLink as={Link} to={ROUTES.ADMIN_DASHBOARD}>
+                  Admin Dashboard
+                </MobileNavLink>
               )}
               
               <MobileNavLink as="button" onClick={handleLogout}>

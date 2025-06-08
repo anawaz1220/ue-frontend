@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, forwardRef } from 'react';
 import PropTypes from 'prop-types';
 import { 
   InputContainer, 
@@ -9,7 +9,7 @@ import {
   PasswordVisibilityIcon
 } from './Input.styles';
 
-const Input = ({
+const Input = forwardRef(({
   label,
   type = 'text',
   id,
@@ -21,7 +21,7 @@ const Input = ({
   required,
   disabled,
   ...props
-}) => {
+}, ref) => {
   const [showPassword, setShowPassword] = useState(false);
   const inputType = type === 'password' && showPassword ? 'text' : type;
 
@@ -34,6 +34,7 @@ const Input = ({
       {label && <Label htmlFor={id}>{label}{required && ' *'}</Label>}
       <div style={{ position: 'relative' }}>
         <StyledInput
+          ref={ref} // Forward the ref
           id={id}
           name={name}
           type={inputType}
@@ -56,7 +57,10 @@ const Input = ({
       {error && <ErrorMessage>{error}</ErrorMessage>}
     </InputContainer>
   );
-};
+});
+
+// Add display name for debugging
+Input.displayName = 'Input';
 
 Input.propTypes = {
   label: PropTypes.string,

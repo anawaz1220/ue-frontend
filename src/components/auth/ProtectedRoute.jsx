@@ -1,3 +1,4 @@
+// src/components/auth/ProtectedRoute.jsx
 import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -84,4 +85,5 @@ export const UnauthenticatedRoute = () => {
   return <Outlet />;
 };
 
+// Default export for backward compatibility
 export default { ProtectedRoute, RoleProtectedRoute, UnauthenticatedRoute };

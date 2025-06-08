@@ -15,7 +15,7 @@ const Button = ({
     <StyledButton
       type={type}
       variant={variant}
-      fullWidth={fullWidth}
+      $fullWidth={fullWidth} // Use $fullWidth instead of fullWidth
       disabled={disabled}
       onClick={onClick}
       {...props}

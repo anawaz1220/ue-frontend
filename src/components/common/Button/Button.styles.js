@@ -53,6 +53,7 @@ const buttonVariants = {
   `,
 };
 
+// Fix: Use $fullWidth instead of fullWidth to prevent it from reaching the DOM
 export const StyledButton = styled.button`
   padding: 12px 24px;
   font-size: ${({ theme }) => theme.fontSizes.medium};
@@ -60,7 +61,7 @@ export const StyledButton = styled.button`
   border-radius: ${({ theme }) => theme.borderRadius.medium};
   cursor: pointer;
   transition: all 0.2s;
-  width: ${({ fullWidth }) => (fullWidth ? '100%' : 'auto')};
+  width: ${({ $fullWidth }) => ($fullWidth ? '100%' : 'auto')};
   
   ${({ variant }) => buttonVariants[variant]};
   

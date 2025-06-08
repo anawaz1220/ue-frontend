@@ -11,6 +11,14 @@ const Checkbox = ({
   disabled,
   ...props
 }) => {
+  // Extract only valid HTML input attributes, exclude React-specific props
+  const {
+    // Remove these React-specific props from DOM
+    // eslint-disable-next-line no-unused-vars
+    label: _label,
+    ...inputProps
+  } = props;
+
   return (
     <CheckboxContainer>
       <StyledCheckbox
@@ -20,7 +28,7 @@ const Checkbox = ({
         checked={checked}
         onChange={onChange}
         disabled={disabled}
-        {...props}
+        {...inputProps} // Now only contains valid HTML attributes
       />
       {label && <Label htmlFor={id}>{label}</Label>}
     </CheckboxContainer>
