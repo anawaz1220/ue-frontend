@@ -1,16 +1,9 @@
 {
   "version": 2,
   "name": "ue-frontend",
-  "framework": "create-react-app",
   "buildCommand": "npm run build",
   "outputDirectory": "build",
-  "installCommand": "npm ci",
-  "regions": ["iad1"],
-  "functions": {
-    "app": {
-      "maxDuration": 30
-    }
-  },
+  "installCommand": "npm install",
   "routes": [
     {
       "src": "/static/(.*)",
