@@ -1,9 +1,16 @@
 {
   "version": 2,
   "name": "ue-frontend",
+  "framework": "create-react-app",
   "buildCommand": "npm run build",
   "outputDirectory": "build",
-  "installCommand": "npm install",
+  "installCommand": "npm ci",
+  "regions": ["iad1"],
+  "functions": {
+    "app": {
+      "maxDuration": 30
+    }
+  },
   "routes": [
     {
       "src": "/static/(.*)",
@@ -21,5 +28,11 @@
       "src": "/(.*)",
       "dest": "/index.html"
     }
-  ]
+  ],
+  "env": {
+    "REACT_APP_ENV": "production",
+    "REACT_APP_API_URL": "https://ue-backend-production.up.railway.app",
+    "CI": "false",
+    "GENERATE_SOURCEMAP": "false"
+  }
 }

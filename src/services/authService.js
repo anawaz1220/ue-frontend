@@ -1,4 +1,4 @@
-// src/services/authService.js - Complete auth service preserving all existing functionality
+// src/services/authService.js - Fixed version with better error handling
 import axios from 'axios';
 import { API_CONFIG } from '../config/api';
 
@@ -57,7 +57,7 @@ const authAPI = axios.create({
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
-  withCredentials: false, // Set to false for JWT-based auth
+  withCredentials: false,
 });
 
 // Request interceptor for auth API
@@ -97,13 +97,14 @@ authAPI.interceptors.response.use(
     console.error('❌ Auth API Error:', {
       status: error.response?.status,
       message: error.response?.data?.message || error.message,
-      url: error.config?.url
+      url: error.config?.url,
+      data: error.response?.data
     });
     return Promise.reject(error);
   }
 );
 
-// Login function with enhanced error handling
+// Login function with enhanced error handling - FIXED VERSION
 const login = async (email, password) => {
   try {
     console.log('🔑 Attempting login for:', email);
@@ -115,45 +116,71 @@ const login = async (email, password) => {
     const response = await authAPI.post(API_CONFIG.ENDPOINTS.LOGIN, requestBody);
     
     const { data } = response;
-    console.log('🔍 Raw API response data:', data); // Add this debug log
+    console.log('🔍 Raw API response data:', data);
     
-    // Handle different response structures
-    if (data.success === false) {
-      throw new Error(data.message || 'Login failed');
+    // FIXED: Check for successful response first
+    if (response.status === 200 || response.status === 201) {
+      // Handle successful login response
+      if (data.success && data.data && data.data.accessToken) {
+        const { user, accessToken, expiresIn, refreshToken } = data.data;
+        
+        // Store tokens
+        tokenManager.storeTokens(accessToken, expiresIn, refreshToken);
+        
+        console.log('✅ Login successful');
+        
+        return {
+          success: true,
+          data: {
+            user,
+            accessToken,
+            expiresIn,
+            refreshToken
+          }
+        };
+      }
+      
+      // Handle direct response format (fallback)
+      if (data.accessToken) {
+        tokenManager.storeTokens(data.accessToken, data.expiresIn, data.refreshToken);
+        console.log('✅ Login successful (direct format)');
+        return {
+          success: true,
+          data: data
+        };
+      }
     }
     
-    // Check for required data
-    if (data.success && data.data && data.data.accessToken) {
-      const { user, accessToken, expiresIn, refreshToken } = data.data;
-      
-      // Store tokens
-      tokenManager.storeTokens(accessToken, expiresIn, refreshToken);
-      
-      console.log('✅ Login successful');
-      
-      // THIS IS THE FIX - Return the complete response data
-      return {
-        success: true,
-        data: {
-          user,
-          accessToken,
-          expiresIn,
-          refreshToken
-        }
-      };
-    }
+    // If we get here, the response was successful but format is unexpected
+    console.error('❌ Unexpected response format:', data);
+    throw new Error('Unexpected response format from server');
     
-    // Handle direct response format (fallback)
-    if (data.accessToken) {
-      tokenManager.storeTokens(data.accessToken, data.expiresIn, data.refreshToken);
-      console.log('✅ Login successful (direct format)');
-      return data;
-    }
-    
-    throw new Error('Invalid login response format');
   } catch (error) {
     console.error('❌ Login failed:', error.response?.data?.message || error.message);
-    const errorMessage = error.response?.data?.message || error.message || 'Login failed';
+    
+    // Handle different types of errors
+    if (error.response) {
+      const { status, data } = error.response;
+      
+      // Handle authentication errors (400, 401, 403)
+      if (status === 400 || status === 401 || status === 403) {
+        const errorMessage = data?.message || 'Invalid credentials';
+        throw new Error(errorMessage);
+      }
+      
+      // Handle server errors (500, 502, 503)
+      if (status >= 500) {
+        const errorMessage = data?.message || 'Server error. Please try again later.';
+        throw new Error(errorMessage);
+      }
+      
+      // Handle other errors
+      const errorMessage = data?.message || `Request failed with status ${status}`;
+      throw new Error(errorMessage);
+    }
+    
+    // Handle network or other errors
+    const errorMessage = error.message || 'Network error. Please check your connection.';
     throw new Error(errorMessage);
   }
 };
