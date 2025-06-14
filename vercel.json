@@ -6,11 +6,6 @@
   "outputDirectory": "build",
   "installCommand": "npm ci",
   "regions": ["iad1"],
-  "functions": {
-    "app": {
-      "maxDuration": 30
-    }
-  },
   "routes": [
     {
       "src": "/static/(.*)",
